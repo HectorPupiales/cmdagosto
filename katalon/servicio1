@@ -1,0 +1,34 @@
+import static com.kms.katalon.core.testobject.ObjectRepository.findTestObject
+import com.kms.katalon.core.webservice.keyword.WSBuiltInKeywords as WS
+import com.kms.katalon.core.util.KeywordUtil
+import groovy.json.JsonSlurper
+
+// Definir el URL del endpoint
+String endpoint = 'https://test-app01.cne.gob.ec/00-WSSDP/api/values'
+
+// Crear un objeto de TestObject para la solicitud
+def requestObject = new com.kms.katalon.core.testobject.RequestObject()
+requestObject.setRestUrl(endpoint)
+requestObject.setRestRequestMethod("POST")
+requestObject.setRestRequestBody('{
+    "CEDULA": "0100450576",
+    "COD_USUARIO": "1",
+    "SISTEMA":"camdom"
+}')
+
+// Enviar la solicitud
+def response = WS.sendRequest(requestObject)
+
+// Verificar el código de respuesta (esperado: 200)
+int expectedStatusCode = 200
+WS.verifyResponseStatusCode(response, expectedStatusCode)
+
+// Analizar el cuerpo de la respuesta
+def responseBody = new JsonSlurper().parseText(response.getResponseBodyContent())
+
+// Verificar el contenido de la respuesta
+if (responseBody != null && responseBody.size() > 0) {
+    KeywordUtil.markPassed("La respuesta contiene datos: " + responseBody.toString())
+} else {
+    KeywordUtil.markFailed("El cuerpo de la respuesta está vacío.")
+}
